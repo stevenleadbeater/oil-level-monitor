@@ -1,0 +1,33 @@
+name: OilLevelMonitor
+
+on:
+  push:
+    paths:
+      - 'oil-level-monitor/**'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build and test Oil Level Monitor
+      uses:  stevenleadbeater/rust-musl-builder@master
+      with:
+          args: /bin/bash -c "cd oil-level-monitor && ls && pwd && make rust-test && make rust-build"
+    - name: Make docker image
+      run: make docker -C oil-level-monitor
+    - name: Build & Push to Gitlab registry
+      uses: opspresso/action-docker@master
+      with:
+        args: --docker
+      env:
+        USERNAME: ${{ secrets.GITLAB_USERNAME }}
+        PASSWORD: ${{ secrets.GITLAB_PERSONAL_ACCESS_TOKEN }}
+        BUILD_PATH: assignment_service/docker
+        REGISTRY: "registry.gitlab.com/ledsys"
+        IMAGE_NAME: "oil-level-monitor"
+        TAG_NAME: "0.1.0"
+        LATEST: "true"
