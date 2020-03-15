@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'oil-level-monitor/**'
+      - '.github/workflows/rust.yml'
 
 jobs:
   build:
