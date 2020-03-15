@@ -2,5 +2,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Distance {
-    distance: i64,
+    pub id: i32,
+    pub distance: i32,
 }

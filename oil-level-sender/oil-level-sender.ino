@@ -17,7 +17,7 @@ void setup () {
     Serial.println( "Failed to access Ethernet controller");
   }
   
-  ether.hisport = 8080;//to access  local host
+  ether.hisport = 8120;//to access  local host
   ether.hisip[0] = 192;
   ether.hisip[1] = 168;
   ether.hisip[2] = 1;
@@ -44,7 +44,9 @@ void loop () {
     long distance = readDistance();
 
     byte sd = stash.create();
-    stash.print("{ \"distance\": ");
+    stash.print("{");
+    stash.print("\"id\":1,");
+    stash.print("\"distance\":");
     stash.print(distance);
     stash.print("}");
     stash.save();
