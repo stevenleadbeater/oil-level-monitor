@@ -29,6 +29,6 @@ jobs:
         PASSWORD: ${{ secrets.GITLAB_PERSONAL_ACCESS_TOKEN }}
         BUILD_PATH: oil-level-monitor/docker
         REGISTRY: "registry.gitlab.com/ledsys"
-        IMAGE_NAME: "oil-level-monitor"
+        IMAGE_NAME: "oil-level/oil-level-monitor"
         TAG_NAME: "0.1.0"
         LATEST: "true"
