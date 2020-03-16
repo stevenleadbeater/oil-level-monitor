@@ -7,7 +7,10 @@ class OilLevelAdapter {
         this.get = this.get.bind(this);
     }
     async get(id) {
-        return this.adapter.get(this.baseAddress, id);
+        return this.adapter.getById(this.baseAddress, id);
+    }
+    async getHistory(id) {
+        return this.adapter.get(`${this.baseAddress}/${id}/history`);
     }
 }
 

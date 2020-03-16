@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 class Adapter {
-    async getAll(url) {
+    async get(url) {
         console.log(`GET: ${url}`);
         return axios.get(`${url}`);
     }
-    async get(url, id) {
+    async getById(url, id) {
         console.log(`GET: ${url}/${id}`);
         return axios.get(`${url}/${id}`);
     }

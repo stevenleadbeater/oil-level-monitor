@@ -7,6 +7,12 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
          http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd">
 
-    <include relativeToChangelogFile="true" file="tables/01_CREATE_distance_table.xml" />
-    <include relativeToChangelogFile="true" file="tables/02_CREATE_distance_history_table.xml" />
+    <changeSet id="2" author="steve">
+        <sqlFile path="sql/create_distance_history_table.sql" splitStatements="false" relativeToChangelogFile="true"/>
+        <rollback>
+            <sql>
+                DROP TABLE distance_history;
+            </sql>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

@@ -1,19 +1,25 @@
 mod logger;
-mod distance;
+mod model;
 mod websocket;
+mod mapper;
+mod repository;
 
-use distance::Distance;
 use actix_web_actors::ws;
 use actix_web::{post, get, web, HttpResponse, HttpServer, App, HttpRequest, Error};
 use actix_cors::Cors;
-use log::{info,debug};
-use postgres::{Connection, TlsMode};
+use log::{info, debug};
 use std::collections::HashMap;
 use std::sync::Mutex;
 use tokio::sync::broadcast;
 
 use crate::logger::setup_logger;
 use crate::websocket::WebSocket;
+use crate::repository::distance_repository;
+use crate::repository::distance_history_repository;
+use crate::mapper::{distance_mapper, distance_history_mapper};
+use crate::model::distance::Distance;
+use std::time::{SystemTime, Duration};
+use crate::model::distance_history::DistanceHistory;
 
 /// do websocket handshake and start `WebSocket` actor
 async fn ws_index(
@@ -34,61 +40,93 @@ async fn ws_index(
 async fn get_by_id(id: web::Path<i32>) -> HttpResponse {
     info!("GET /{}", id);
 
-    let client = Connection::connect("postgresql://oil_level_user:password@localhost:5431/oil_level", TlsMode::None)
-        .expect("Cannot connect to DB");
-
-    let rows = client.query(r##"
-    SELECT
-        id, distance
-    FROM
-        distance
-    WHERE
-        id = $1
-                            "##, &[&id.into_inner()])
-        .expect("Query failed");
-
-    if rows.len() != 1 {
-        return HttpResponse::InternalServerError().body("Expecting exactly one row for queries by id");
-    }
-
-    if rows.get(0).len() != 2 {
-        return HttpResponse::InternalServerError().body("Expecting exactly two columns for distance rows");
-    }
-
-    let id: i32 = rows.get(0).get(0);
-    let distance: i32 = rows.get(0).get(1);
-
-    let distance = Distance {
-        id,
-        distance,
+    let repository = distance_repository::DistanceRepository {
+        connection_string: "postgresql://oil_level_user:password@localhost:5431/oil_level".to_string()
     };
 
-    HttpResponse::Ok().body(serde_json::to_string(&distance).unwrap())
+    match repository.get_by_id(id.into_inner()).await {
+        Ok(rows) =>
+            match distance_mapper::map(rows) {
+                Ok(distance) => HttpResponse::Ok().body(serde_json::to_string(&distance).unwrap()),
+                Err(error) => HttpResponse::InternalServerError().body(error)
+            },
+        Err(error) => HttpResponse::InternalServerError().body(error)
+    }
+}
+
+#[get("/{id}/history")]
+async fn get_history_by_id(id: web::Path<i32>) -> HttpResponse {
+    info!("GET /{}/history", id);
+
+    let repository = distance_history_repository::DistanceHistoryRepository {
+        connection_string: "postgresql://oil_level_user:password@localhost:5431/oil_level".to_string()
+    };
+
+    match repository.get_by_distance_id(id.into_inner()).await {
+        Ok(rows) =>
+            match distance_history_mapper::map_many(rows) {
+                Ok(distances) => HttpResponse::Ok().body(serde_json::to_string(&distances).unwrap()),
+                Err(error) => HttpResponse::InternalServerError().body(error)
+            },
+        Err(error) => HttpResponse::InternalServerError().body(error)
+    }
 }
 
 #[post("/")]
 async fn post(
     item: web::Json<Distance>,
-    tx: web::Data<Mutex<tokio::sync::broadcast::Sender<Distance>>>
+    tx: web::Data<Mutex<tokio::sync::broadcast::Sender<Distance>>>,
 ) -> HttpResponse {
     let distance = item.into_inner();
     info!("POST / {:#?}", distance);
 
-    let client = Connection::connect("postgresql://oil_level_user:password@localhost:5431/oil_level", TlsMode::None)
-        .expect("Cannot connect to DB");
+    let repository = distance_repository::DistanceRepository {
+        connection_string: "postgresql://oil_level_user:password@localhost:5431/oil_level".to_string()
+    };
+    let history_repository = distance_history_repository::DistanceHistoryRepository {
+        connection_string: "postgresql://oil_level_user:password@localhost:5431/oil_level".to_string()
+    };
 
-    client.execute(r##"
-    INSERT INTO distance (id, distance) VALUES ($1, $2)
-    ON CONFLICT (id)
-    DO
-        UPDATE
-        SET distance = $2
-        WHERE distance.id = $1;
-                            "##, &[&distance.id, &distance.distance])
-        .expect("Query failed");
+    if let Err(error) = repository.upsert(distance).await {
+        return HttpResponse::InternalServerError().body(error);
+    }
 
+    let latest = history_repository.get_latest_distance_history(distance.id).await;
+    if latest.is_err() {
+        return HttpResponse::InternalServerError().body(latest.err().unwrap());
+    }
+    let latest = latest.unwrap();
+    if latest.len() > 0 {
+        let latest = distance_history_mapper::map_one(latest);
+        if latest.is_err() {
+            return HttpResponse::InternalServerError().body(latest.err().unwrap());
+        }
+        let time_since_last_reading = SystemTime::now().duration_since(latest.unwrap().time_of_reading);
+        if time_since_last_reading.is_err() {
+            return HttpResponse::InternalServerError().body("Failed to calculate time since last reading");
+        }
+        let time_since_last_reading = time_since_last_reading.unwrap();
+        if time_since_last_reading > Duration::from_secs(3600) {
+            if let Err(error) = record_distance_history(distance, history_repository).await {
+                return HttpResponse::InternalServerError().body(error);
+            }
+        }
+    } else if latest.len() == 0 {
+        if let Err(error) = record_distance_history(distance, history_repository).await {
+            return HttpResponse::InternalServerError().body(error);
+        }
+    }
     tx.lock().unwrap().send(distance).unwrap();
     HttpResponse::Ok().finish()
+}
+
+async fn record_distance_history(distance: Distance, history_repository: distance_history_repository::DistanceHistoryRepository) -> Result<(), String> {
+    history_repository.insert(DistanceHistory {
+        id: None,
+        distance_id: distance.id,
+        distance: distance.distance,
+        time_of_reading: SystemTime::now()
+    }).await
 }
 
 #[actix_rt::main]
@@ -107,6 +145,7 @@ async fn main() -> std::io::Result<()> {
         .wrap(Cors::new().send_wildcard().finish())
         .service(get_by_id)
         .service(post)
+        .service(get_history_by_id)
         .service(web::resource("/ws/").route(web::get().to(ws_index))))
         .bind("0.0.0.0:8120")?
         .run()

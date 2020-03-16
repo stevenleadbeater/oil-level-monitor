@@ -1,12 +1,26 @@
 .container {
     position: relative;
-    left: 300px;
+    display: inline-block;
+    height: 500px;
+    width: 500px;
+    vertical-align: top;
 }
 
-@media screen and (max-width: 767px) {
-    .container {
-        left: 0px;
-    }
+.chart-container {
+    position: relative;
+    display: inline-block;
+    width: 600px;
+    height: 400px;
+    vertical-align: top;
+    margin-top: 20px;
+}
+
+.chart {
+    width: 600px;
+    height: 400px;
+    background: #282c34;
+    padding: .5rem;
+    border-radius: 5px;
 }
 
 .circle {
@@ -48,11 +62,11 @@
     position: absolute;
     top: 200px;
     left: 50px;
-    width: 404px;
-    height: 200px;
+    width: 400px;
+    height: 201px;
     display: inline-block;
     background-color: blue;
-    border: 1px solid red;
+    border: 3px solid red;
     border-bottom: none;
     border-top: none;
 }
