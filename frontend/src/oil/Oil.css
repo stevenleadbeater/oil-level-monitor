@@ -1,0 +1,71 @@
+.container {
+    position: relative;
+    left: 300px;
+}
+
+@media screen and (max-width: 767px) {
+    .container {
+        left: 0px;
+    }
+}
+
+.circle {
+    position: absolute;
+    display: inline-block;
+    width: 400px;
+    height: 400px;
+    border-radius: 400px;
+    border: 3px solid red;
+}
+
+.top.circle {
+    top: 0;
+    left: 50px;
+}
+
+.fill.circle {
+    background-color: blue;
+    top: 100px;
+    left: 50px;
+}
+
+.level.reading {
+    position: absolute;
+    top: 280px;
+    left: 210px;
+    z-index: 1;
+    text-shadow: -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 1px 1px 0 white;
+    font-size: 50px;
+}
+
+.bottom.circle {
+    background-color: blue;
+    top: 200px;
+    left: 50px;
+}
+
+.rectangle {
+    position: absolute;
+    top: 200px;
+    left: 50px;
+    width: 404px;
+    height: 200px;
+    display: inline-block;
+    background-color: blue;
+    border: 1px solid red;
+    border-bottom: none;
+    border-top: none;
+}
+
+.empty.rectangle {
+    /*height: 100px;*/
+    background-color: white;
+}
+
+.fill.rectangle {
+    background-color: blue;
+}
+
+.transformed {
+    transform: matrix3d(1, 0, 0, 0, 0, 0.2, -0.85, 0, 0, 0.85, 0.52, 0, 0, 0, 0, 1);
+}

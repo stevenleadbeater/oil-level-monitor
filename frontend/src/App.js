@@ -1,7 +1,7 @@
 import React from 'react';
 import './App.css';
-import SideBar from "./SideBar";
-import routes from "./routes";
+import SideBar from "./sidebar/SideBar";
+import routes from "./routes/routes";
 import {
     BrowserRouter as Router,
     Switch,

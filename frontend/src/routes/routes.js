@@ -1,7 +1,7 @@
-import oil from './oil.png';
-import home from './home.png';
-import Home from "./Home";
-import Oil from "./Oil";
+import oil from '../assets/oil.png';
+import home from '../assets/home.png';
+import Home from "../home/Home";
+import Oil from "../oil/Oil";
 
 const routes = [
     {

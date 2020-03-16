@@ -34,7 +34,7 @@ async fn ws_index(
 async fn get_by_id(id: web::Path<i32>) -> HttpResponse {
     info!("GET /{}", id);
 
-    let client = Connection::connect("postgresql://oil_level_user:password@192.168.1.245:5431/oil_level", TlsMode::None)
+    let client = Connection::connect("postgresql://oil_level_user:password@localhost:5431/oil_level", TlsMode::None)
         .expect("Cannot connect to DB");
 
     let rows = client.query(r##"
@@ -74,7 +74,7 @@ async fn post(
     let distance = item.into_inner();
     info!("POST / {:#?}", distance);
 
-    let client = Connection::connect("postgresql://oil_level_user:password@192.168.1.245:5431/oil_level", TlsMode::None)
+    let client = Connection::connect("postgresql://oil_level_user:password@localhost:5431/oil_level", TlsMode::None)
         .expect("Cannot connect to DB");
 
     client.execute(r##"
