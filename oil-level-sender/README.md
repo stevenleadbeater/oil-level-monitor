@@ -1,6 +1,6 @@
 # Arduino Sketch for Monitoring Oil Tank Level
 
-##Components Required
+## Components Required
   
   You will need the following components −
   
@@ -10,7 +10,7 @@
       1 x HiLetgo ENC28J60 ENC28J60-I/SO HR911105A
       1 x (Optional) Active POE Splitter with Micro USB Female to Mini USB Male Adapter
 
-###HC-SR04
+### HC-SR04
 
 The HC-SR04 ultrasonic sensor uses SONAR to determine the distance of an object just like the bats do. It offers excellent non-contact range detection with high accuracy and stable readings in an easy-to-use package from 2 cm to 400 cm or 1” to 13 feet.
 
@@ -27,7 +27,7 @@ The operation is not affected by sunlight or black material, although acoustical
 | TRIG     | Pin 4        |                                                   |
 | ECHO     | Pin 5        |                                                   |
 
-###ENC28J60
+### ENC28J60
 
 The Ethernet Controller (ENC28J60) is a so called SPI device and uses the SPI pins (8, 11, 12, 13) of your Arduino.
 
