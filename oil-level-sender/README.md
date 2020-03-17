@@ -51,3 +51,21 @@ The [EtherCard](https://github.com/njh/ethercard) library is used for TCP/IP com
 | MOSI     | Pin 11       |                                                   |
 | CS       | Pin 8        |Selectable with the ether.begin() function:        |
 |          |              |`ether.begin(sizeof Ethernet::buffer, mymac, 8)`   |
+
+## Running the project
+
+You will need to locate the following code in the sketch:
+
+```c++
+ether.hisport = 8120;//to access  local host
+ether.hisip[0] = 192;
+ether.hisip[1] = 168;
+ether.hisip[2] = 1;
+ether.hisip[3] = 245;
+```
+
+hisport is the port on which the REST API (oil-level-monitor sub project) is running
+
+The hisip array items are the parts of the IPv4 address on which the REST API (oil-level-monitor sub project) is running 
+
+These will need to be changed to match your deployment
