@@ -24,7 +24,7 @@ React web application with a nice looking mobile enabled UI
 Liquibase changsets defining the database schema
 
  
-##Running
+## Running
 
 There are some complexities around how the project is run, there are 4 separate containers that will be running on the server which provides access to the API and the front end they are as follows:
 
