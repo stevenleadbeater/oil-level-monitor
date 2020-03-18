@@ -18,10 +18,10 @@ void setup () {
   }
   
   ether.hisport = 8120;//to access  local host
-  ether.hisip[0] = 192;
-  ether.hisip[1] = 168;
-  ether.hisip[2] = 1;
-  ether.hisip[3] = 245;
+  ether.hisip[0] = 10;
+  ether.hisip[1] = 10;
+  ether.hisip[2] = 6;
+  ether.hisip[3] = 254;
   
   Serial.println(F("Setting up DHCP"));
   if (!ether.dhcpSetup())

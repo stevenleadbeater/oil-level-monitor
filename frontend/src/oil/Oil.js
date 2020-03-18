@@ -7,7 +7,7 @@ export default () => {
     const [level, setLevel] = useState(0);
     const [levelHistory, setLevelHistory] = useState(null);
 
-    const connection = new WebSocket(`ws://localhost:8120/ws/`);
+    const connection = new WebSocket(`ws://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}/ws/`);
     connection.onmessage = evt => {
         console.log(`Got message ${evt.data}`);
         const distance = JSON.parse(evt.data);

@@ -1,6 +1,10 @@
 # Define required macros here
 SHELL = /bin/sh
 
+local:
+	make -C oil-level-monitor
+	make -C database docker
+	make -C frontend
 release:
 	make -C oil-level-monitor
 clean:
@@ -8,4 +12,4 @@ clean:
 database:
 	make -C database
 run:
-	DATABASE_HOST="postgres" DATABASE_PORT="5432" DATABASE_USERNAME="oil_level_user" DATABASE_PASSWORD="password" docker-compose up
+	DATABASE_HOST="postgres" DATABASE_PORT="5432" docker-compose up

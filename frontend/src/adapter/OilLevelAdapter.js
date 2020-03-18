@@ -2,7 +2,7 @@ import Adapter from './Adapter';
 
 class OilLevelAdapter {
     constructor() {
-        this.baseAddress = `http://localhost:8120`;
+        this.baseAddress = `http://${process.env.REACT_APP_BACKEND_HOST}:${process.env.REACT_APP_BACKEND_PORT}`;
         this.adapter = new Adapter();
         this.get = this.get.bind(this);
     }
