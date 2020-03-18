@@ -40,11 +40,7 @@ async fn ws_index(
 async fn get_by_id(id: web::Path<i32>) -> HttpResponse {
     info!("GET /{}", id);
 
-    let repository = distance_repository::DistanceRepository {
-        connection_string: "postgresql://oil_level_user:password@localhost:5431/oil_level".to_string()
-    };
-
-    match repository.get_by_id(id.into_inner()).await {
+    match distance_repository::get_by_id(id.into_inner()).await {
         Ok(rows) =>
             match distance_mapper::map(rows) {
                 Ok(distance) => HttpResponse::Ok().body(serde_json::to_string(&distance).unwrap()),
@@ -58,11 +54,7 @@ async fn get_by_id(id: web::Path<i32>) -> HttpResponse {
 async fn get_history_by_id(id: web::Path<i32>) -> HttpResponse {
     info!("GET /{}/history", id);
 
-    let repository = distance_history_repository::DistanceHistoryRepository {
-        connection_string: "postgresql://oil_level_user:password@localhost:5431/oil_level".to_string()
-    };
-
-    match repository.get_by_distance_id(id.into_inner()).await {
+    match distance_history_repository::get_by_distance_id(id.into_inner()).await {
         Ok(rows) =>
             match distance_history_mapper::map_many(rows) {
                 Ok(distances) => HttpResponse::Ok().body(serde_json::to_string(&distances).unwrap()),
@@ -80,18 +72,11 @@ async fn post(
     let distance = item.into_inner();
     info!("POST / {:#?}", distance);
 
-    let repository = distance_repository::DistanceRepository {
-        connection_string: "postgresql://oil_level_user:password@localhost:5431/oil_level".to_string()
-    };
-    let history_repository = distance_history_repository::DistanceHistoryRepository {
-        connection_string: "postgresql://oil_level_user:password@localhost:5431/oil_level".to_string()
-    };
-
-    if let Err(error) = repository.upsert(distance).await {
+    if let Err(error) = distance_repository::upsert(distance).await {
         return HttpResponse::InternalServerError().body(error);
     }
 
-    let latest = history_repository.get_latest_distance_history(distance.id).await;
+    let latest = distance_history_repository::get_latest_distance_history(distance.id).await;
     if latest.is_err() {
         return HttpResponse::InternalServerError().body(latest.err().unwrap());
     }
@@ -107,12 +92,12 @@ async fn post(
         }
         let time_since_last_reading = time_since_last_reading.unwrap();
         if time_since_last_reading > Duration::from_secs(3600) {
-            if let Err(error) = record_distance_history(distance, history_repository).await {
+            if let Err(error) = record_distance_history(distance).await {
                 return HttpResponse::InternalServerError().body(error);
             }
         }
     } else if latest.len() == 0 {
-        if let Err(error) = record_distance_history(distance, history_repository).await {
+        if let Err(error) = record_distance_history(distance).await {
             return HttpResponse::InternalServerError().body(error);
         }
     }
@@ -120,8 +105,8 @@ async fn post(
     HttpResponse::Ok().finish()
 }
 
-async fn record_distance_history(distance: Distance, history_repository: distance_history_repository::DistanceHistoryRepository) -> Result<(), String> {
-    history_repository.insert(DistanceHistory {
+async fn record_distance_history(distance: Distance) -> Result<(), String> {
+    distance_history_repository::insert(DistanceHistory {
         id: None,
         distance_id: distance.id,
         distance: distance.distance,

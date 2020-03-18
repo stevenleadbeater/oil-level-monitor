@@ -24,7 +24,14 @@
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>3.8.4</version>
                 <configuration>
-                    <propertyFile>liquibase.properties</propertyFile>
+                    <changeLogFile>db.changelog.xml</changeLogFile>
+                    <driver>org.postgresql.Driver</driver>
+                    <url>jdbc:postgresql://${env.DATABASE_HOST}:${env.DATABASE_PORT}/oil_level</url>
+                    <username>${env.DATABASE_USERNAME}</username>
+                    <password>${env.DATABASE_PASSWORD}</password>
+                    <verbose>true</verbose>
+                    <dropFirst>false</dropFirst>
+                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
                 </configuration>
                 <executions>
                     <execution>
