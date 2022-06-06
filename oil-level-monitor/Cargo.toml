@@ -21,4 +21,4 @@ futures = "0.3.0"
 log = "0.4.8"
 chrono = "0.4.0"
 env_logger = "0.7.1"
-tokio = { version = "0.2", features = ["full"] }
+tokio = { version = "1.8", features = ["full"] }
